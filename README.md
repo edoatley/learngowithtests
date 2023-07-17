@@ -31,3 +31,9 @@ Navigating to http://localhost:8000/pkg/testing/ would be worthwhile to see what
 
 If you don't have `godoc` command, then maybe you are using the newer version of Go (1.14 or later) which is no longer including `godoc`. 
 You can manually install it with `go install golang.org/x/tools/cmd/godoc@latest`.
+
+
+Other links
+
+- https://blog.boot.dev/golang/best-ways-to-learn-golang/
+- https://www.codewars.com/collections/golang-learned-katas
