@@ -1,5 +1,21 @@
 # learngowithtests
 
+- [learngowithtests](#learngowithtests)
+  - [Running code](#running-code)
+  - [Creating a module](#creating-a-module)
+  - [Writing tests](#writing-tests)
+  - [Go doc](#go-doc)
+  - [Examples](#examples)
+  - [Benchmarking](#benchmarking)
+  - [Test Coverage](#test-coverage)
+  - [Interesting Language notes](#interesting-language-notes)
+    - [Arrays and slices](#arrays-and-slices)
+    - [First class functions](#first-class-functions)
+    - [Interfaces](#interfaces)
+    - [Pointers](#pointers)
+  - [Maps](#maps)
+
+
 Following along with https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world
 
 ## Running code
@@ -177,4 +193,102 @@ func Sum(numbers []int) int {
   }
   return sum
 }
+```
+
+### Interfaces
+
+Interfaces are a way to define behaviour. They are a collection of method signatures that a type must implement in order to be considered an implementation of the interface.
+
+Let's take the idea of a `Shape`, how does something become a shape? We just tell Go what a Shape is using an interface declaration:
+
+```go
+type Shape interface {
+	Area() float64
+}
+```
+
+Once you add this to the code, other types can now implement this interface by implementing the Area() method,
+there is no requirement for a type to explicitly state that it implements an interface. In other words, in Go
+interface resolution is implicit. If the type you pass in matches what the interface is asking for, it will compile.
+
+### Pointers
+
+Pointers are important in go to allow you to pass a reference to an object. 
+
+For example take this definition of a wallet:
+
+```go
+type Wallet struct {
+	balance int
+}
+func (w Wallet) Deposit(amount int) {
+ 	w.balance += amount
+}
+```
+
+In Go, when you call a function or a method the arguments are copied.
+So when calling `func (w Wallet) Deposit(amount int)` the `w`` is a copy of whatever we called the method from.
+To fix this we can pass in a pointer to a wallet and operate on that object directly:
+
+```go
+func (w *Wallet) Deposit(amount int) {
+	w.balance += amount
+}
+```
+
+note the parameter is now `*Wallet` not `Wallet`. This means we are passing in a pointer to a wallet.
+
+You may wonder why the pointer does not need to be dereferenced to create a `Wallet` object say with code like this:
+
+```go
+func (w *Wallet) Deposit(amount int) {
+	(*w).balance += amount
+}
+```
+
+Instead we seemingly addressed the object directly. In fact, the code above using `(*w)` is absolutely valid. However, the makers of Go deemed this notation cumbersome, so the language permits us to write w.balance, without an explicit dereference. These pointers to structs even have their own name: struct pointers and they are automatically dereferenced.
+
+## Maps
+
+Maps are a built in type in Go that are similar to dictionaries in Python. They are a collection of key value pairs.
+Declaring a Map is somewhat similar to an array. Except, it starts with the map keyword and requires two types. 
+
+The first is the key type, which is written inside the [].  it must be a type that can be compared with ==. See
+https://golang.org/ref/spec#Comparison_operators for more details.
+
+The second is the value type, which goes right after the []. This can be any type you like
+
+For example:
+
+```go
+dictionary := map[string]int{"dave", 123}
+```
+
+You can add a value to a map as follows:
+
+```go
+dictionary["bob"] = 345
+```
+
+An interesting property of maps is that you can modify them without passing as an address to it (e.g &myMap)
+This may make them feel like a "reference type", but [as Dave Cheney describes](https://dave.cheney.net/2017/04/30/if-a-map-isnt-a-reference-variable-what-is-it) they are not.
+
+> A map value is a pointer to a runtime.hmap structure.
+
+So when you pass a map to a function/method, you are indeed copying it, but just the pointer part, not the underlying data structure that contains the data.
+
+A gotcha with maps is that they can be a nil value. A nil map behaves like an empty map when reading, but attempts to write to a nil map will cause a runtime panic. You can read more about maps [here](https://blog.golang.org/go-maps-in-action). Therefore, you should never initialize an empty map variable:
+
+```go
+var m map[string]string
+```
+
+Instead, you can initialize an empty map like we were doing above, or use the make keyword to create a map for you:
+
+```go
+var dictionary = map[string]string{}
+
+// OR
+
+var dictionary = make(map[string]string)
 ```
