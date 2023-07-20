@@ -14,6 +14,7 @@
     - [Interfaces](#interfaces)
     - [Pointers](#pointers)
   - [Maps](#maps)
+  - [Cannot import main: a Go Module gotcha](#cannot-import-main-a-go-module-gotcha)
 
 
 Following along with https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world
@@ -292,3 +293,25 @@ var dictionary = map[string]string{}
 
 var dictionary = make(map[string]string)
 ```
+
+## Cannot import main: a Go Module gotcha
+
+See article here: https://appliedgo.net/testmain/
+
+TL;DR:
+
+If you call your module main and have a test then run:
+
+```bash
+> go test
+```
+
+inside the project directory, but instead of the usual output, you get this:
+
+```bash
+# main.test
+/var/folders/_m/dgnkqt8d3j10svk5c06px4vc0000gn/T/go-build306511963/b001/_testmain.go:13:2: cannot import "main"
+FAIL    main [build failed]
+```
+
+Seems best to rename main package to something else.
