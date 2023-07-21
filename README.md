@@ -15,6 +15,9 @@
     - [Pointers](#pointers)
   - [Maps](#maps)
   - [Cannot import main: a Go Module gotcha](#cannot-import-main-a-go-module-gotcha)
+  - [goroutines](#goroutines)
+    - [Race conditions](#race-conditions)
+    - [Channels](#channels)
 
 
 Following along with https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world
@@ -315,3 +318,68 @@ FAIL    main [build failed]
 ```
 
 Seems best to rename main package to something else.
+
+## goroutines
+
+Normally in Go when we call a function doSomething() we wait for it to return (even if it has no value to return, we
+still wait for it to finish). We say that this operation is blocking - it makes us wait for it to finish. An operation
+that does not block in Go will run in a separate process called a `goroutine`. 
+
+To make a function run in a goroutine we use the keyword `go` before the function call. For example:
+
+```go
+func main() {
+    go doSomething()
+}
+```
+
+As another example you can write an anonymous call to a function in a goroutine like this:
+
+```go
+func main() {
+    go func() {
+        fmt.Println("I'm in a goroutine")
+    }()
+}
+```
+
+Note the `()` at the end of the function call. This is required to call the function.
+If you run this code you will see that the program exits immediately. This is because the main function is not waiting
+
+
+### Race conditions
+
+This can lead to race conditions if the concurrency is not managed correctly. For example, if you have a function that
+writes to a variable and you call it in a goroutine, you may not be able to guarantee the value of the variable when
+you read it later in the program.
+
+Go has a capability to test for race conditions:
+
+```bash
+go test -race
+```
+
+### Channels
+
+We can solve a data race by coordinating our goroutines using channels. Channels are a Go data structure that can both receive and send values. These operations, along with their details, allow communication between different processes.
+
+To create a channel we use the built-in make function:
+
+```go
+ch := make(chan int)
+```
+
+We can call our parallel workload in channels and then read the result from the channel. For example:
+
+```go
+func main() {
+    ch := make(chan int)
+    go func() {
+        ch <- 42
+    }()
+    fmt.Println(<-ch)
+}
+```
+
+Note the syntax `<-` it is use first to send a value to a channel and then to read a value from a channel.
+
