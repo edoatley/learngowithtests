@@ -18,6 +18,8 @@
   - [goroutines](#goroutines)
     - [Race conditions](#race-conditions)
     - [Channels](#channels)
+    - [Deferring](#deferring)
+    - [Synchronising processes](#synchronising-processes)
 
 
 Following along with https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world
@@ -383,3 +385,54 @@ func main() {
 
 Note the syntax `<-` it is use first to send a value to a channel and then to read a value from a channel.
 
+### Deferring
+
+Go has a built in keyword `defer` that allows you to defer the execution of a function until the surrounding function
+returns. For example:
+
+```go
+func main() {
+    defer fmt.Println("I'm deferred")
+    fmt.Println("I'm not deferred")
+}
+```
+
+This will output:
+
+```
+I'm not deferred
+I'm deferred
+```
+
+It can be used like a "try with resources" in java to ensure  resources are cleaned up after a function returns.
+
+### Synchronising processes
+
+We can synchronise go processes using a select statement. This allows us to wait for a channel to receive a value. For
+example:
+
+```go
+func Racer(a, b string) (winner string) {
+	select {
+	case <-ping(a):
+		return a
+	case <-ping(b):
+		return b
+	}
+}
+func ping(url string) chan struct{} {
+	ch := make(chan struct{})
+	go func() {
+		http.Get(url)
+		close(ch)
+	}()
+	return ch
+}
+```
+We have defined a function ping which creates a chan struct{} and returns it.
+
+In our case, we don't care what type is sent to the channel, we just want to signal we are done and closing the channel works perfectly!
+
+Note: always `make` channels, never declare them directly. This is because a nil channel blocks forever.
+
+`select` allows you to wait on multiple channels. The first one to send a value "wins" and the code underneath the case is executed.
