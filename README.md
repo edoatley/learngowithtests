@@ -20,6 +20,7 @@
     - [Channels](#channels)
     - [Deferring](#deferring)
     - [Synchronising processes](#synchronising-processes)
+    - [Reflection](#reflection)
 
 
 Following along with https://quii.gitbook.io/learn-go-with-tests/go-fundamentals/hello-world
@@ -436,3 +437,25 @@ In our case, we don't care what type is sent to the channel, we just want to sig
 Note: always `make` channels, never declare them directly. This is because a nil channel blocks forever.
 
 `select` allows you to wait on multiple channels. The first one to send a value "wins" and the code underneath the case is executed.
+
+### Reflection
+
+Go has the ability to use reflection to retrieve / inspect arbitrary fields within a struct. This can be useful if 
+for example you want to write a generic function that can print out the fields of any struct.
+
+In this case the function signature would be:
+
+```go
+func inspectStruct(s interface{}) {
+    // ...
+}
+```
+
+you can get the value of a `string` field using the `reflect` package like this:
+
+```go
+reflect.ValueOf(s).Field(0).String()
+```
+
+See [reflection.go](./reflectwalk/reflection.go) for a full example. Or look at this [blog](https://blog.golang.org/laws-of-reflection) for something more advanced.
+
